@@ -20,6 +20,7 @@
 
       .winner {
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         position: absolute;
@@ -27,11 +28,21 @@
         height: 100vh;
         width: 100vw;
       }
+
+      .new-game-btn {
+        width: 150px;
+        height: 50px;
+        border-radius: 5px;
+        font-size: 20px;
+        text-align: center;
+      }
     </style>
   </head>
   <body>
     <div class="winner hidden">
       <h1>YOU WIN!!!</h1>
+      <br />
+      <button class="new-game-btn hidden">New Game?</button>
     </div>
     <script src="index.js"></script>
   </body>
