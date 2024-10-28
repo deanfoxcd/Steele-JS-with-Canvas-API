@@ -3,6 +3,16 @@ const width = 600;
 const height = 600;
 const cellsRows = 3;
 const cellsColumns = 3;
+const unitWidth = width / cellsColumns;
+const unitHeight = height / cellsRows;
+
+const shuffleArray = function (array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const randomIndex = Math.floor(Math.random() * (i + 1));
+    [array[i], array[randomIndex]] = [array[randomIndex], array[i]];
+    return array;
+  }
+};
 
 const engine = Engine.create();
 const { world } = engine;
@@ -69,18 +79,9 @@ const stepThroughCell = (row, column) => {
     [row + 1, column, 'down'], // Down - H r, c
     [row, column - 1, 'left'], // Left - V r, c-1
   ];
-  //   for (let neighbor of neighbors) {
-  //     const [nextRow, nextColumn] = neighbor;
-  //     if (
-  //       nextRow < 0 ||
-  //       nextRow >= cellsRows ||
-  //       nextColumn < 0 ||
-  //       nextColumn >= cellsColumns ||
-  //       mazeGrid[nextRow][nextColumn] === true
-  //     )
-  //       continue;
-  //   }
-  let viableNeighbors = [];
+
+  shuffleArray(neighbors);
+
   for (let i = 0; i < neighbors.length; i++) {
     const [nextRow, nextColumn, direction] = neighbors[i];
     if (
@@ -91,34 +92,51 @@ const stepThroughCell = (row, column) => {
       mazeGrid[nextRow][nextColumn] === true
     )
       continue;
-    viableNeighbors.push(neighbors[i]);
-  }
-  //   console.log(viableNeighbors);
 
-  const targetCell =
-    viableNeighbors[Math.floor(Math.random() * viableNeighbors.length)];
-  console.log(targetCell);
+    if (direction === 'up') {
+      horizontals[row - 1][column] = true;
+    } else if (direction === 'right') {
+      verticals[row][column] = true;
+    } else if (direction === 'down') {
+      horizontals[row][column] = true;
+    } else if (direction === 'left') {
+      verticals[row][column - 1] = true;
+    }
 
-  const [targetRow, targetColumn] = targetCell;
-
-  if (targetCell[2] === 'up') {
-    horizontals[row - 1][column] = true;
+    stepThroughCell(nextRow, nextColumn);
   }
-  if (targetCell[2] === 'right') {
-    verticals[row][column] = true;
-  }
-  if (targetCell[2] === 'down') {
-    horizontals[row][column] = true;
-  }
-  if (targetCell[2] === 'left') {
-    verticals[row][column - 1] = true;
-    console.log('moved left');
-  }
-  console.log(verticals);
-  console.log(horizontals);
-
-  stepThroughCell(targetRow, targetColumn);
 };
 
 stepThroughCell(startRow, startColumn);
 // console.log(mazeGrid);
+
+console.log(verticals);
+console.log(horizontals);
+
+horizontals.forEach((row, rowIndex) => {
+  row.forEach((open, columnIndex) => {
+    if (open) return;
+    const wall = Bodies.rectangle(
+      columnIndex * unitWidth + unitWidth / 2,
+      rowIndex * unitWidth + unitWidth,
+      unitWidth,
+      5,
+      { isStatic: true }
+    );
+    World.add(world, wall);
+  });
+});
+
+verticals.forEach((row, rowIndex) => {
+  row.forEach((open, columnIndex) => {
+    if (open) return;
+    const wall = Bodies.rectangle(
+      columnIndex * unitHeight + unitHeight,
+      rowIndex * unitHeight + unitHeight / 2,
+      5,
+      unitHeight,
+      { isStatic: true }
+    );
+    World.add(world, wall);
+  });
+});
